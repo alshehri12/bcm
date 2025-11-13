@@ -1,0 +1,434 @@
+# Arabic translations for BCM Management System
+# Copyright (C) 2025
+# This file is distributed under the same license as the BCM package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: BCM 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-14 00:00+0000\n"
+"PO-Revision-Date: 2025-01-14 00:00+0000\n"
+"Last-Translator: BCM Team\n"
+"Language-Team: Arabic\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+# Navigation
+msgid "BCM Management System"
+msgstr "نظام إدارة استمرارية الأعمال"
+
+msgid "Dashboard"
+msgstr "لوحة التحكم"
+
+msgid "Risks"
+msgstr "المخاطر"
+
+msgid "Add Risk"
+msgstr "إضافة مخاطرة"
+
+msgid "Reports"
+msgstr "التقارير"
+
+msgid "Export to Excel"
+msgstr "تصدير إلى Excel"
+
+msgid "Export to PDF"
+msgstr "تصدير إلى PDF"
+
+msgid "Profile"
+msgstr "الملف الشخصي"
+
+msgid "Admin Panel"
+msgstr "لوحة الإدارة"
+
+msgid "Logout"
+msgstr "تسجيل الخروج"
+
+# User Roles
+msgid "Admin (BCM Manager)"
+msgstr "مدير (مدير استمرارية الأعمال)"
+
+msgid "Department User"
+msgstr "مستخدم القسم"
+
+msgid "Viewer/Auditor"
+msgstr "مُشاهد/مُدقق"
+
+# Risk Management
+msgid "Risk Information"
+msgstr "معلومات المخاطرة"
+
+msgid "Department"
+msgstr "القسم"
+
+msgid "Expected Problem"
+msgstr "المشكلة المتوقعة"
+
+msgid "Impact"
+msgstr "التأثير"
+
+msgid "Impact if Occurred"
+msgstr "التأثير في حال حدوثها"
+
+msgid "Mitigation Notes"
+msgstr "ملاحظات التخفيف"
+
+msgid "Mitigation Notes / Action Plan"
+msgstr "ملاحظات التخفيف / خطة العمل"
+
+msgid "Severity"
+msgstr "الخطورة"
+
+msgid "Status"
+msgstr "الحالة"
+
+msgid "Estimated Resolution"
+msgstr "الوقت المقدر للحل"
+
+msgid "Estimated Resolution Duration"
+msgstr "المدة المقدرة للحل"
+
+msgid "Resolution Duration"
+msgstr "مدة الحل"
+
+msgid "Unit"
+msgstr "الوحدة"
+
+# Severity Levels
+msgid "Low"
+msgstr "منخفضة"
+
+msgid "Medium"
+msgstr "متوسطة"
+
+msgid "High"
+msgstr "عالية"
+
+msgid "Critical"
+msgstr "حرجة"
+
+# Status Types
+msgid "Open"
+msgstr "مفتوحة"
+
+msgid "In Progress"
+msgstr "قيد التنفيذ"
+
+msgid "Resolved"
+msgstr "محلولة"
+
+msgid "Closed"
+msgstr "مغلقة"
+
+# Duration Units
+msgid "Hours"
+msgstr "ساعات"
+
+msgid "Days"
+msgstr "أيام"
+
+msgid "Weeks"
+msgstr "أسابيع"
+
+# Actions
+msgid "View Details"
+msgstr "عرض التفاصيل"
+
+msgid "Edit"
+msgstr "تعديل"
+
+msgid "Delete"
+msgstr "حذف"
+
+msgid "Create"
+msgstr "إنشاء"
+
+msgid "Update"
+msgstr "تحديث"
+
+msgid "Save"
+msgstr "حفظ"
+
+msgid "Cancel"
+msgstr "إلغاء"
+
+msgid "Back to List"
+msgstr "العودة للقائمة"
+
+msgid "Add New Risk"
+msgstr "إضافة مخاطرة جديدة"
+
+# Risk Details
+msgid "Lock Status"
+msgstr "حالة القفل"
+
+msgid "Locked"
+msgstr "مقفلة"
+
+msgid "Unlocked"
+msgstr "غير مقفلة"
+
+msgid "Locked By"
+msgstr "مقفلة بواسطة"
+
+msgid "Locked At"
+msgstr "تاريخ القفل"
+
+msgid "Lock Risk"
+msgstr "قفل المخاطرة"
+
+msgid "Unlock Risk"
+msgstr "فتح المخاطرة"
+
+msgid "Delete Risk"
+msgstr "حذف المخاطرة"
+
+# Audit Trail
+msgid "Audit Trail"
+msgstr "سجل التدقيق"
+
+msgid "Created By"
+msgstr "أنشئت بواسطة"
+
+msgid "Created At"
+msgstr "تاريخ الإنشاء"
+
+msgid "Last Updated By"
+msgstr "آخر تحديث بواسطة"
+
+msgid "Last Updated"
+msgstr "آخر تحديث"
+
+msgid "Created"
+msgstr "تاريخ الإنشاء"
+
+# Dashboard
+msgid "BCM Manager Dashboard"
+msgstr "لوحة تحكم مدير استمرارية الأعمال"
+
+msgid "Department Dashboard"
+msgstr "لوحة تحكم القسم"
+
+msgid "Viewer Dashboard"
+msgstr "لوحة تحكم المشاهد"
+
+msgid "Total Risks"
+msgstr "إجمالي المخاطر"
+
+msgid "Open Risks"
+msgstr "المخاطر المفتوحة"
+
+msgid "Critical Risks"
+msgstr "المخاطر الحرجة"
+
+msgid "Locked Risks"
+msgstr "المخاطر المقفلة"
+
+msgid "Department Overview"
+msgstr "نظرة عامة على الأقسام"
+
+msgid "Recent Risks"
+msgstr "المخاطر الحديثة"
+
+msgid "Problem"
+msgstr "المشكلة"
+
+msgid "View Risks"
+msgstr "عرض المخاطر"
+
+msgid "Action"
+msgstr "إجراء"
+
+msgid "Actions"
+msgstr "الإجراءات"
+
+# Messages
+msgid "No Risks Found"
+msgstr "لم يتم العثور على مخاطر"
+
+msgid "There are no risks matching your criteria."
+msgstr "لا توجد مخاطر تطابق معاييرك."
+
+msgid "Create your first risk"
+msgstr "قم بإنشاء أول مخاطرة"
+
+msgid "Create a new risk"
+msgstr "إنشاء مخاطرة جديدة"
+
+msgid "Risk created successfully."
+msgstr "تم إنشاء المخاطرة بنجاح."
+
+msgid "Risk updated successfully."
+msgstr "تم تحديث المخاطرة بنجاح."
+
+msgid "Risk deleted successfully."
+msgstr "تم حذف المخاطرة بنجاح."
+
+msgid "Risk locked successfully."
+msgstr "تم قفل المخاطرة بنجاح."
+
+msgid "Risk unlocked successfully."
+msgstr "تم فتح المخاطرة بنجاح."
+
+msgid "You do not have permission to view this risk."
+msgstr "ليس لديك صلاحية لعرض هذه المخاطرة."
+
+msgid "You do not have permission to edit this risk."
+msgstr "ليس لديك صلاحية لتعديل هذه المخاطرة."
+
+msgid "Language changed successfully."
+msgstr "تم تغيير اللغة بنجاح."
+
+msgid "You have been logged out successfully."
+msgstr "تم تسجيل الخروج بنجاح."
+
+# Filtering
+msgid "Severity:"
+msgstr "الخطورة:"
+
+msgid "Status:"
+msgstr "الحالة:"
+
+msgid "Search:"
+msgstr "بحث:"
+
+msgid "Search"
+msgstr "بحث"
+
+msgid "Search risks..."
+msgstr "البحث عن المخاطر..."
+
+msgid "Filter"
+msgstr "تصفية"
+
+msgid "Clear"
+msgstr "مسح"
+
+msgid "All Severities"
+msgstr "جميع مستويات الخطورة"
+
+msgid "All Statuses"
+msgstr "جميع الحالات"
+
+# Form
+msgid "Describe the potential risk or expected problem"
+msgstr "صف المخاطرة المحتملة أو المشكلة المتوقعة"
+
+msgid "Describe the expected impact if this risk occurs"
+msgstr "صف التأثير المتوقع في حال حدوث هذه المخاطرة"
+
+msgid "Enter estimated resolution time"
+msgstr "أدخل الوقت المقدر للحل"
+
+msgid "Optional: Describe mitigation plan or action items"
+msgstr "اختياري: صف خطة التخفيف أو عناصر العمل"
+
+msgid "Select the department for this risk"
+msgstr "اختر القسم لهذه المخاطرة"
+
+msgid "This risk is locked"
+msgstr "هذه المخاطرة مقفلة"
+
+msgid "and cannot be edited."
+msgstr "ولا يمكن تعديلها."
+
+# Pagination
+msgid "First"
+msgstr "الأول"
+
+msgid "Previous"
+msgstr "السابق"
+
+msgid "Next"
+msgstr "التالي"
+
+msgid "Last"
+msgstr "الأخير"
+
+msgid "Page"
+msgstr "صفحة"
+
+msgid "of"
+msgstr "من"
+
+# Delete Confirmation
+msgid "Confirm Delete"
+msgstr "تأكيد الحذف"
+
+msgid "Warning!"
+msgstr "تحذير!"
+
+msgid "This action cannot be undone."
+msgstr "لا يمكن التراجع عن هذا الإجراء."
+
+msgid "Are you sure you want to delete this risk?"
+msgstr "هل أنت متأكد من حذف هذه المخاطرة?"
+
+msgid "Yes, Delete Risk"
+msgstr "نعم، احذف المخاطرة"
+
+# Login
+msgid "Login"
+msgstr "تسجيل الدخول"
+
+msgid "Business Continuity Management"
+msgstr "إدارة استمرارية الأعمال"
+
+msgid "Username"
+msgstr "اسم المستخدم"
+
+msgid "Password"
+msgstr "كلمة المرور"
+
+msgid "Forgot Password?"
+msgstr "هل نسيت كلمة المرور؟"
+
+# Footer
+msgid "Business Continuity Management System"
+msgstr "نظام إدارة استمرارية الأعمال"
+
+# Profile
+msgid "User Profile"
+msgstr "الملف الشخصي للمستخدم"
+
+msgid "Full Name"
+msgstr "الاسم الكامل"
+
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+msgid "Role"
+msgstr "الدور"
+
+msgid "Member Since"
+msgstr "عضو منذ"
+
+msgid "Preferred language"
+msgstr "اللغة المفضلة"
+
+msgid "Contact phone number"
+msgstr "رقم الهاتف"
+
+# Table Headers
+msgid "ID"
+msgstr "الرقم التعريفي"
+
+msgid "Resolution Time"
+msgstr "وقت الحل"
+
+# Status Information
+msgid "Status Information"
+msgstr "معلومات الحالة"
+
+# Other
+msgid "N/A"
+msgstr "غير متاح"
+
+msgid "No risks found"
+msgstr "لم يتم العثور على مخاطر"
+
+msgid "View"
+msgstr "عرض"

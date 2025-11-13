@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}Risks List - BCM System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1><i class="fas fa-exclamation-triangle"></i> Risks Management</h1>
+    </div>
+    <div class="col-md-4 text-right">
+        {% if user.is_admin or user.is_department_user %}
+        <a href="{% url 'risks:create' %}" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Add New Risk
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="form-inline">
+            <div class="form-group mr-3">
+                <label for="id_severity" class="mr-2">Severity:</label>
+                {{ filter_form.severity }}
+            </div>
+            <div class="form-group mr-3">
+                <label for="id_status" class="mr-2">Status:</label>
+                {{ filter_form.status }}
+            </div>
+            <div class="form-group mr-3">
+                <label for="id_search" class="mr-2">Search:</label>
+                {{ filter_form.search }}
+            </div>
+            <button type="submit" class="btn btn-secondary">
+                <i class="fas fa-filter"></i> Filter
+            </button>
+            <a href="{% url 'risks:list' %}" class="btn btn-outline-secondary ml-2">
+                <i class="fas fa-redo"></i> Clear
+            </a>
+        </form>
+    </div>
+</div>
+
+<!-- Risks Table -->
+{% if page_obj %}
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Department</th>
+                        <th>Expected Problem</th>
+                        <th>Severity</th>
+                        <th>Status</th>
+                        <th>Resolution Time</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for risk in page_obj %}
+                    <tr>
+                        <td>{{ risk.id }}</td>
+                        <td>
+                            <span class="badge badge-secondary">{{ risk.department.code }}</span>
+                        </td>
+                        <td>
+                            {{ risk.expected_problem|truncatewords:10 }}
+                            {% if risk.is_locked %}
+                            <i class="fas fa-lock text-warning" title="Locked"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge severity-badge-{{ risk.severity }} text-white">
+                                {{ risk.get_severity_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge status-badge-{{ risk.status }} text-white">
+                                {{ risk.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ risk.get_resolution_duration_display_full }}</td>
+                        <td>{{ risk.created_at|date:"Y-m-d" }}</td>
+                        <td>
+                            <a href="{% url 'risks:detail' risk.pk %}" class="btn btn-sm btn-info" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% if user.is_admin %}
+                            <a href="{% url 'risks:update' risk.pk %}" class="btn btn-sm btn-warning" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            {% elif user.is_department_user and risk.department == user.department and not risk.is_locked %}
+                            <a href="{% url 'risks:update' risk.pk %}" class="btn btn-sm btn-warning" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <h4><i class="fas fa-info-circle"></i> No Risks Found</h4>
+    <p>
+        There are no risks matching your criteria.
+        {% if user.is_admin or user.is_department_user %}
+        <a href="{% url 'risks:create' %}">Create a new risk</a>.
+        {% endif %}
+    </p>
+</div>
+{% endif %}
+{% endblock %}

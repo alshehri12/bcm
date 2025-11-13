@@ -1,0 +1,42 @@
+/* Simple RTL (Right-to-Left) styles for Arabic - keeps Bootstrap styling intact */
+
+/* Basic RTL direction */
+html[lang="ar"],
+html[lang="ar"] body {
+    direction: rtl !important;
+    text-align: right !important;
+}
+
+/* Keep forms left-to-right aligned but with RTL text */
+html[lang="ar"] input,
+html[lang="ar"] textarea,
+html[lang="ar"] select {
+    direction: rtl;
+    text-align: right;
+}
+
+/* Tables RTL */
+html[lang="ar"] .table {
+    direction: rtl;
+}
+
+/* Dropdown menus align right */
+html[lang="ar"] .dropdown-menu {
+    text-align: right;
+}
+
+/* Alert messages RTL */
+html[lang="ar"] .alert {
+    text-align: right;
+}
+
+/* Card text RTL */
+html[lang="ar"] .card-body {
+    text-align: right;
+}
+
+/* Badge spacing for RTL */
+html[lang="ar"] .badge {
+    margin-left: 0.25rem;
+    margin-right: 0;
+}

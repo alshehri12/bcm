@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Dashboard" %} - BCM System{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">
+        <i class="fas fa-tachometer-alt text-primary-600"></i>
+        {% if user.is_admin %}
+            {% trans "BCM Manager Dashboard" %}
+        {% elif user.is_department_user %}
+            {% trans "Department Dashboard" %} - {{ department.name }}
+        {% else %}
+            {% trans "Viewer Dashboard" %}
+        {% endif %}
+    </h1>
+</div>
+
+<!-- Statistics Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Total Risks Card -->
+    <div class="glass rounded-2xl p-6 hover-lift">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600 mb-1">{% trans "Total Risks" %}</p>
+                <h3 class="text-3xl font-bold text-gray-900">{{ total_risks|default:0 }}</h3>
+            </div>
+            <div class="w-14 h-14 gradient-green rounded-xl flex items-center justify-center shadow-lg">
+                <i class="fas fa-exclamation-triangle text-white text-2xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Open Risks Card -->
+    <div class="glass rounded-2xl p-6 hover-lift border-l-4 border-yellow-500">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600 mb-1">{% trans "Open Risks" %}</p>
+                <h3 class="text-3xl font-bold text-yellow-600">{{ open_risks|default:0 }}</h3>
+            </div>
+            <div class="w-14 h-14 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
+                <i class="fas fa-folder-open text-white text-2xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Critical Risks Card -->
+    <div class="glass rounded-2xl p-6 hover-lift border-l-4 border-red-500">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600 mb-1">{% trans "Critical Risks" %}</p>
+                <h3 class="text-3xl font-bold text-red-600">{{ critical_risks|default:0 }}</h3>
+            </div>
+            <div class="w-14 h-14 bg-gradient-to-br from-red-500 to-red-700 rounded-xl flex items-center justify-center shadow-lg">
+                <i class="fas fa-fire text-white text-2xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Locked Risks Card (Department Users) -->
+    {% if user.is_department_user %}
+    <div class="glass rounded-2xl p-6 hover-lift border-l-4 border-primary-500">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-600 mb-1">{% trans "Locked Risks" %}</p>
+                <h3 class="text-3xl font-bold text-primary-600">{{ locked_risks|default:0 }}</h3>
+            </div>
+            <div class="w-14 h-14 gradient-green rounded-xl flex items-center justify-center shadow-lg">
+                <i class="fas fa-lock text-white text-2xl"></i>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Department Overview (Admin Only) -->
+{% if user.is_admin and dept_stats %}
+<div class="glass rounded-2xl shadow-xl overflow-hidden mb-8">
+    <div class="gradient-green px-6 py-4">
+        <h2 class="text-xl font-bold text-white flex items-center space-x-2 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+            <i class="fas fa-building"></i>
+            <span>{% trans "Department Overview" %}</span>
+        </h2>
+    </div>
+    <div class="p-6">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            {% trans "Department" %}
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            {% trans "Total Risks" %}
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            {% trans "Open Risks" %}
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            {% trans "Critical Risks" %}
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            {% trans "Action" %}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for stat in dept_stats %}
+                    <tr class="hover:bg-primary-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="font-semibold text-gray-900">{{ stat.department.name }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-700">
+                            {{ stat.total_risks }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                {{ stat.open_risks }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                {{ stat.critical_risks }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="{% url 'risks:list' %}?department={{ stat.department.id }}"
+                               class="inline-flex items-center px-4 py-2 border border-primary-600 rounded-lg text-sm font-medium text-primary-600 hover:bg-primary-600 hover:text-white transition-colors">
+                                <i class="fas fa-eye mr-2 {% if LANGUAGE_CODE == 'ar' %}ml-2 mr-0{% endif %}"></i>
+                                {% trans "View Risks" %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent Risks -->
+{% if recent_risks %}
+<div class="glass rounded-2xl shadow-xl overflow-hidden mb-8">
+    <div class="bg-gray-800 px-6 py-4">
+        <h2 class="text-xl font-bold text-white flex items-center space-x-2 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+            <i class="fas fa-clock"></i>
+            <span>{% trans "Recent Risks" %}</span>
+        </h2>
+    </div>
+    <div class="p-6">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            {% trans "Department" %}
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            {% trans "Problem" %}
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            {% trans "Severity" %}
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            {% trans "Status" %}
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            {% trans "Created" %}
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            {% trans "Action" %}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for risk in recent_risks %}
+                    <tr class="hover:bg-primary-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="font-medium text-gray-900">{{ risk.department.code }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-gray-700">{{ risk.expected_problem|truncatewords:10 }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if risk.severity == 'LOW' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                {{ risk.get_severity_display }}
+                            </span>
+                            {% elif risk.severity == 'MEDIUM' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                {{ risk.get_severity_display }}
+                            </span>
+                            {% elif risk.severity == 'HIGH' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                                {{ risk.get_severity_display }}
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                {{ risk.get_severity_display }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if risk.status == 'OPEN' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                                {{ risk.get_status_display }}
+                            </span>
+                            {% elif risk.status == 'IN_PROGRESS' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                {{ risk.get_status_display }}
+                            </span>
+                            {% elif risk.status == 'RESOLVED' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                {{ risk.get_status_display }}
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                                {{ risk.get_status_display }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {{ risk.created_at|date:"Y-m-d H:i" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="{% url 'risks:detail' risk.pk %}"
+                               class="inline-flex items-center px-4 py-2 gradient-green rounded-lg text-sm font-medium text-white hover:shadow-lg transition-shadow">
+                                <i class="fas fa-eye mr-2 {% if LANGUAGE_CODE == 'ar' %}ml-2 mr-0{% endif %}"></i>
+                                {% trans "View" %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- No Risks Message -->
+{% if not recent_risks and not dept_stats %}
+<div class="glass rounded-2xl p-8 text-center border-l-4 border-primary-500">
+    <div class="inline-flex items-center justify-center w-20 h-20 gradient-green rounded-full mb-4">
+        <i class="fas fa-info-circle text-white text-3xl"></i>
+    </div>
+    <h3 class="text-2xl font-bold text-gray-900 mb-2">{% trans "No risks found" %}</h3>
+    <p class="text-gray-600 mb-4">
+        There are currently no risks in the system.
+        {% if user.is_admin or user.is_department_user %}
+            <a href="{% url 'risks:create' %}" class="text-primary-600 hover:text-primary-700 font-semibold">
+                {% trans "Create your first risk" %}
+            </a>.
+        {% endif %}
+    </p>
+</div>
+{% endif %}
+{% endblock %}

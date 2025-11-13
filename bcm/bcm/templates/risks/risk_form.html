@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ action }} {% trans "Risk" %} - BCM System{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center space-x-3 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+            <div class="w-12 h-12 gradient-green rounded-xl flex items-center justify-center">
+                <i class="fas fa-{% if action == 'Create' %}plus-circle{% else %}edit{% endif %} text-white text-xl"></i>
+            </div>
+            <span>{{ action }} {% trans "Risk" %}</span>
+        </h1>
+    </div>
+
+    <!-- Form Card -->
+    <div class="glass rounded-2xl shadow-xl overflow-hidden">
+        <div class="gradient-green px-6 py-4">
+            <h2 class="text-xl font-bold text-white">{% trans "Risk Information" %}</h2>
+        </div>
+
+        <div class="p-8">
+            {% if user.is_department_user %}
+            <div class="mb-6 p-4 bg-primary-50 border-l-4 border-primary-500 rounded-lg">
+                <div class="flex items-center space-x-3 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+                    <i class="fas fa-building text-primary-600 text-xl"></i>
+                    <div>
+                        <strong class="text-primary-900">{% trans "Department" %}:</strong>
+                        <span class="text-primary-700">{{ user.department.name }} ({{ user.department.code }})</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+
+                {% if form.department %}
+                <div>
+                    <label for="{{ form.department.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        {% trans "Department" %} <span class="text-red-500">*</span>
+                    </label>
+                    <select name="{{ form.department.name }}" id="{{ form.department.id_for_label }}"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+                        <option value="">{% trans "Select the department for this risk" %}</option>
+                        {% for choice in form.department.field.queryset %}
+                        <option value="{{ choice.id }}" {% if form.department.value == choice.id|stringformat:"s" %}selected{% endif %}>
+                            {{ choice.name }} ({{ choice.code }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                    {% if form.department.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.department.errors|first }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div>
+                    <label for="{{ form.expected_problem.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        {% trans "Expected Problem" %} <span class="text-red-500">*</span>
+                    </label>
+                    <textarea name="{{ form.expected_problem.name }}" id="{{ form.expected_problem.id_for_label }}"
+                              rows="4"
+                              placeholder="{% trans 'Describe the potential risk or expected problem' %}"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">{{ form.expected_problem.value|default:'' }}</textarea>
+                    {% if form.expected_problem.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.expected_problem.errors|first }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.impact.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        {% trans "Impact if Occurred" %} <span class="text-red-500">*</span>
+                    </label>
+                    <textarea name="{{ form.impact.name }}" id="{{ form.impact.id_for_label }}"
+                              rows="4"
+                              placeholder="{% trans 'Describe the expected impact if this risk occurs' %}"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">{{ form.impact.value|default:'' }}</textarea>
+                    {% if form.impact.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.impact.errors|first }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.estimated_resolution_duration.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {% trans "Estimated Resolution Duration" %} <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number" name="{{ form.estimated_resolution_duration.name }}"
+                               id="{{ form.estimated_resolution_duration.id_for_label }}"
+                               value="{{ form.estimated_resolution_duration.value|default:'' }}"
+                               placeholder="{% trans 'Enter estimated resolution time' %}"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+                        {% if form.estimated_resolution_duration.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.estimated_resolution_duration.errors|first }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ form.resolution_duration_unit.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {% trans "Unit" %} <span class="text-red-500">*</span>
+                        </label>
+                        <select name="{{ form.resolution_duration_unit.name }}" id="{{ form.resolution_duration_unit.id_for_label }}"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+                            {% for value, label in form.resolution_duration_unit.field.choices %}
+                            <option value="{{ value }}" {% if form.resolution_duration_unit.value == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.resolution_duration_unit.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.resolution_duration_unit.errors|first }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    <label for="{{ form.mitigation_notes.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        {% trans "Mitigation Notes / Action Plan" %}
+                    </label>
+                    <textarea name="{{ form.mitigation_notes.name }}" id="{{ form.mitigation_notes.id_for_label }}"
+                              rows="4"
+                              placeholder="{% trans 'Optional: Describe mitigation plan or action items' %}"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">{{ form.mitigation_notes.value|default:'' }}</textarea>
+                    {% if form.mitigation_notes.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.mitigation_notes.errors|first }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.severity.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {% trans "Severity" %} <span class="text-red-500">*</span>
+                        </label>
+                        <select name="{{ form.severity.name }}" id="{{ form.severity.id_for_label }}"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+                            {% for value, label in form.severity.field.choices %}
+                            <option value="{{ value }}" {% if form.severity.value == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.severity.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.severity.errors|first }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ form.status.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {% trans "Status" %} <span class="text-red-500">*</span>
+                        </label>
+                        <select name="{{ form.status.name }}" id="{{ form.status.id_for_label }}"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+                            {% for value, label in form.status.field.choices %}
+                            <option value="{{ value }}" {% if form.status.value == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.status.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.status.errors|first }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if risk.is_locked %}
+                <div class="p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg">
+                    <div class="flex items-center space-x-3 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+                        <i class="fas fa-lock text-yellow-600 text-xl"></i>
+                        <div>
+                            <strong class="text-yellow-900">{% trans "This risk is locked" %}</strong>
+                            <span class="text-yellow-700">{% trans "and cannot be edited." %}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="flex items-center space-x-4 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %} pt-6 border-t border-gray-200">
+                    <button type="submit"
+                            {% if risk.is_locked %}disabled{% endif %}
+                            class="px-8 py-3 gradient-green text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-shadow disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+                        <i class="fas fa-save"></i>
+                        <span>{{ action }} {% trans "Risk" %}</span>
+                    </button>
+                    <a href="{% if risk %}{% url 'risks:detail' risk.pk %}{% else %}{% url 'risks:list' %}{% endif %}"
+                       class="px-8 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors flex items-center space-x-2 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+                        <i class="fas fa-times"></i>
+                        <span>{% trans "Cancel" %}</span>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

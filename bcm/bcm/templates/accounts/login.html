@@ -1,0 +1,184 @@
+{% load i18n %}
+{% load static %}
+{% get_current_language as LANGUAGE_CODE %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}" {% if LANGUAGE_CODE == 'ar' %}dir="rtl"{% endif %}>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Login" %} - BCM System</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-green {
+            background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%);
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* RTL Support */
+        html[dir="rtl"] {
+            direction: rtl;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <!-- Logo and Brand -->
+        <div class="text-center mb-8">
+            <img src="{% static 'images/ncec-logo-en.png' %}" alt="NCEC Logo" class="h-20 w-auto mx-auto mb-4">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">BCM System</h1>
+            <p class="text-gray-600">{% trans "Business Continuity Management" %}</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="glass rounded-2xl shadow-2xl overflow-hidden">
+            <div class="gradient-green px-6 py-4">
+                <h2 class="text-xl font-bold text-white text-center">{% trans "Login" %}</h2>
+            </div>
+
+            <div class="p-8">
+                <!-- Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-4 p-4 rounded-lg {% if message.tags == 'error' %}bg-red-50 border-l-4 border-red-500{% elif message.tags == 'success' %}bg-green-50 border-l-4 border-green-500{% else %}bg-blue-50 border-l-4 border-blue-500{% endif %}">
+                            <div class="flex items-center space-x-3 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+                                <i class="fas {% if message.tags == 'error' %}fa-exclamation-circle text-red-600{% elif message.tags == 'success' %}fa-check-circle text-green-600{% else %}fa-info-circle text-blue-600{% endif %}"></i>
+                                <p class="text-sm font-medium {% if message.tags == 'error' %}text-red-800{% elif message.tags == 'success' %}text-green-800{% else %}text-blue-800{% endif %}">
+                                    {{ message }}
+                                </p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Login Form -->
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+
+                    <!-- Username Field -->
+                    <div>
+                        <label for="{{ form.username.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {% trans "Username" %}
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 {% if LANGUAGE_CODE == 'ar' %}right-0 pr-3{% else %}left-0 pl-3{% endif %} flex items-center pointer-events-none">
+                                <i class="fas fa-user text-gray-400"></i>
+                            </div>
+                            <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}"
+                                   value="{{ form.username.value|default:'' }}"
+                                   class="w-full {% if LANGUAGE_CODE == 'ar' %}pr-10 pl-4{% else %}pl-10 pr-4{% endif %} py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                                   placeholder="{% trans 'Username' %}"
+                                   required>
+                        </div>
+                        {% if form.username.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.username.errors|first }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Password Field -->
+                    <div>
+                        <label for="{{ form.password.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            {% trans "Password" %}
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 {% if LANGUAGE_CODE == 'ar' %}right-0 pr-3{% else %}left-0 pl-3{% endif %} flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-400"></i>
+                            </div>
+                            <input type="password" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}"
+                                   class="w-full {% if LANGUAGE_CODE == 'ar' %}pr-10 pl-4{% else %}pl-10 pr-4{% endif %} py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                                   placeholder="{% trans 'Password' %}"
+                                   required>
+                        </div>
+                        {% if form.password.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.password.errors|first }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="w-full py-3 gradient-green text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
+                        <i class="fas fa-sign-in-alt {% if LANGUAGE_CODE == 'ar' %}ml-2{% else %}mr-2{% endif %}"></i>
+                        {% trans "Login" %}
+                    </button>
+                </form>
+
+                <!-- Forgot Password Link -->
+                <div class="mt-6 text-center">
+                    <a href="{% url 'accounts:password_reset' %}" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                        {% trans "Forgot Password?" %}
+                    </a>
+                </div>
+
+                <!-- Language Switcher -->
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <form method="post" action="{% url 'accounts:set_language' %}" class="flex items-center justify-center space-x-4 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{% url 'accounts:login' %}">
+                        <button type="submit" name="language" value="en"
+                                class="px-4 py-2 rounded-lg text-sm font-medium {% if LANGUAGE_CODE == 'en' %}bg-primary-100 text-primary-700{% else %}text-gray-600 hover:bg-gray-100{% endif %} transition-colors">
+                            English
+                        </button>
+                        <button type="submit" name="language" value="ar"
+                                class="px-4 py-2 rounded-lg text-sm font-medium {% if LANGUAGE_CODE == 'ar' %}bg-primary-100 text-primary-700{% else %}text-gray-600 hover:bg-gray-100{% endif %} transition-colors">
+                            العربية
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center">
+            <p class="text-sm text-gray-600">
+                &copy; 2025 BCM System | Powered by NCEC
+            </p>
+        </div>
+    </div>
+</body>
+</html>
