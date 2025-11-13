@@ -49,7 +49,6 @@ def profile_view(request):
     })
 
 
-@login_required
 def set_language(request):
     """Set user language preference"""
     from django.utils import translation
@@ -57,16 +56,16 @@ def set_language(request):
     if request.method == 'POST':
         language = request.POST.get('language', 'en')
         if language in ['en', 'ar']:
-            # Save to user profile
-            request.user.language = language
-            request.user.save(update_fields=['language'])
-
             # Activate language for current session
             translation.activate(language)
             request.session[translation.LANGUAGE_SESSION_KEY] = language
 
-            messages.success(request, 'Language changed successfully.')
+            # Save to user profile if authenticated
+            if request.user.is_authenticated:
+                request.user.language = language
+                request.user.save(update_fields=['language'])
+                messages.success(request, 'Language changed successfully.')
 
     # Redirect to the page they came from
-    next_url = request.POST.get('next', request.META.get('HTTP_REFERER', 'dashboard:home'))
+    next_url = request.POST.get('next', request.META.get('HTTP_REFERER', '/'))
     return redirect(next_url)
