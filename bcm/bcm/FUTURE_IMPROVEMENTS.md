@@ -418,6 +418,180 @@ class RiskComment(models.Model):
 
 ---
 
+### 2.6 Dynamic Form Fields (Admin-Configurable Fields)
+
+**Business Need**: Different organizations and departments have unique risk assessment requirements. Allow admins to customize risk forms without code changes.
+
+**Features to Implement**:
+- [ ] **Custom Field Definition System**
+  - Admin interface to create/edit/delete custom fields
+  - Field types: Text, Number, Date, Dropdown, Multi-select, Checkbox, File Upload
+  - Field properties:
+    - Label (English and Arabic)
+    - Required/Optional
+    - Help text
+    - Default value
+    - Validation rules (min/max, regex pattern)
+    - Display order
+  - Department-specific fields (IT department fields vs HR department fields)
+
+- [ ] **Field Schema Management**
+  - Create field templates (reusable field definitions)
+  - Import/Export field configurations
+  - Version control for schema changes
+  - Rollback capability
+
+- [ ] **Dynamic Form Rendering**
+  - Automatically generate form UI based on schema
+  - Support for conditional fields (show field X if field Y = value)
+  - Field grouping and sections
+  - Mobile-responsive dynamic forms
+
+- [ ] **Data Storage & Retrieval**
+  - Store custom field data in JSONField (PostgreSQL recommended)
+  - Efficient querying of custom field values
+  - Index frequently-searched custom fields
+  - Data validation based on field type
+
+- [ ] **Reporting Integration**
+  - Include custom fields in PDF/Excel exports
+  - Filter risks by custom field values
+  - Search across custom fields
+  - Analytics on custom field data
+
+**Technical Implementation**:
+
+**Database Schema**:
+```python
+class CustomFieldDefinition(models.Model):
+    """Admin-defined custom field schema"""
+    name = models.CharField(max_length=100, unique=True)
+    label_en = models.CharField(max_length=200)
+    label_ar = models.CharField(max_length=200)
+    field_type = models.CharField(max_length=20, choices=[
+        ('text', 'Text'),
+        ('textarea', 'Long Text'),
+        ('number', 'Number'),
+        ('date', 'Date'),
+        ('dropdown', 'Dropdown'),
+        ('multiselect', 'Multi-Select'),
+        ('checkbox', 'Checkbox'),
+        ('file', 'File Upload'),
+    ])
+    is_required = models.BooleanField(default=False)
+    help_text_en = models.TextField(blank=True)
+    help_text_ar = models.TextField(blank=True)
+    default_value = models.TextField(blank=True)
+    validation_rules = models.JSONField(default=dict, blank=True)  # e.g., {"min": 0, "max": 100}
+    options = models.JSONField(default=list, blank=True)  # For dropdown/multiselect
+    display_order = models.IntegerField(default=0)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)  # null = all departments
+    is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['display_order', 'name']
+
+# Add to existing Risk model
+class Risk(models.Model):
+    # ... existing fields ...
+    custom_fields = models.JSONField(default=dict, blank=True)
+    # Structure: {"field_name": "field_value", "employee_count": 50, "backup_frequency": "daily"}
+```
+
+**Form Generation Example**:
+```python
+def get_dynamic_risk_form(user):
+    """Generate form class dynamically based on custom field definitions"""
+
+    # Get custom fields for user's department
+    custom_fields = CustomFieldDefinition.objects.filter(
+        Q(department=user.department) | Q(department__isnull=True),
+        is_active=True
+    ).order_by('display_order')
+
+    # Build form fields dynamically
+    form_fields = {}
+    for field_def in custom_fields:
+        if field_def.field_type == 'text':
+            form_fields[field_def.name] = forms.CharField(
+                label=field_def.get_label(user.language),
+                required=field_def.is_required,
+                help_text=field_def.get_help_text(user.language)
+            )
+        elif field_def.field_type == 'number':
+            form_fields[field_def.name] = forms.IntegerField(
+                label=field_def.get_label(user.language),
+                required=field_def.is_required,
+                validators=[
+                    MinValueValidator(field_def.validation_rules.get('min', 0)),
+                    MaxValueValidator(field_def.validation_rules.get('max', 999999))
+                ]
+            )
+        elif field_def.field_type == 'dropdown':
+            form_fields[field_def.name] = forms.ChoiceField(
+                label=field_def.get_label(user.language),
+                choices=[(opt, opt) for opt in field_def.options],
+                required=field_def.is_required
+            )
+        # ... other field types
+
+    # Create dynamic form class
+    DynamicRiskForm = type('DynamicRiskForm', (forms.Form,), form_fields)
+    return DynamicRiskForm
+```
+
+**UI/UX Requirements**:
+- **Admin Interface**:
+  - Drag-and-drop field ordering
+  - Visual field builder (similar to Google Forms)
+  - Live preview of form
+  - Field validation tester
+
+- **Risk Form**:
+  - Seamless integration with core fields
+  - Clear visual separation (Core Fields vs Custom Fields sections)
+  - Responsive design for all field types
+  - Auto-save draft functionality
+
+**Use Cases**:
+1. **IT Department** adds custom fields:
+   - "Affected Systems" (multi-select)
+   - "Patch Available" (yes/no)
+   - "Vulnerability Score (CVSS)" (number 0-10)
+
+2. **HR Department** adds custom fields:
+   - "Number of Employees Affected" (number)
+   - "Union Notification Required" (yes/no)
+   - "Privacy Impact" (dropdown: Low/Medium/High)
+
+3. **Finance Department** adds custom fields:
+   - "Budget Impact" (currency)
+   - "Audit Finding Reference" (text)
+   - "Compliance Framework" (multi-select: SOX, PCI-DSS, etc.)
+
+**Implementation Effort**:
+- **Time**: 3-4 days
+- **Complexity**: Medium-High
+- **Dependencies**: PostgreSQL (for better JSONField support) or continue with SQLite with limitations
+
+**Benefits**:
+- ✅ No code deployment needed for new fields
+- ✅ Adapts to changing business requirements
+- ✅ Department-specific customization
+- ✅ Scalable for future needs
+- ✅ Aligns with ISO 31000 (organization-specific context)
+
+**Risks/Considerations**:
+- Query performance on JSONField (mitigate with indexing)
+- Data migration complexity if switching storage approach
+- Need clear admin documentation/training
+- Potential for form bloat (too many fields)
+
+---
+
 ## PRIORITY 3: Business Continuity Management (BCM) Integration (Nice to Have)
 
 ### 3.1 Recovery Time Objective (RTO) & Recovery Point Objective (RPO)
