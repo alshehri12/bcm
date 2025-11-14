@@ -1,149 +1,280 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}Risks List - BCM System{% endblock %}
+{% block title %}{% trans "Risks List" %} - BCM System{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-md-8">
-        <h1><i class="fas fa-exclamation-triangle"></i> Risks Management</h1>
-    </div>
-    <div class="col-md-4 text-right">
-        {% if user.is_admin or user.is_department_user %}
-        <a href="{% url 'risks:create' %}" class="btn btn-primary">
-            <i class="fas fa-plus-circle"></i> Add New Risk
-        </a>
-        {% endif %}
-    </div>
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 flex items-center space-x-3 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %} mb-4 md:mb-0">
+        <div class="w-12 h-12 gradient-green rounded-xl flex items-center justify-center">
+            <i class="fas fa-exclamation-triangle text-white text-xl"></i>
+        </div>
+        <span>{% trans "Risks Management" %}</span>
+    </h1>
+    {% if user.is_admin or user.is_department_user %}
+    <a href="{% url 'risks:create' %}"
+       class="px-6 py-3 gradient-green text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-shadow flex items-center space-x-2 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+        <i class="fas fa-plus-circle"></i>
+        <span>{% trans "Add New Risk" %}</span>
+    </a>
+    {% endif %}
 </div>
 
-<!-- Filters -->
-<div class="card mb-4">
-    <div class="card-body">
-        <form method="get" class="form-inline">
-            <div class="form-group mr-3">
-                <label for="id_severity" class="mr-2">Severity:</label>
-                {{ filter_form.severity }}
+<!-- Filters Card -->
+<div class="glass rounded-2xl shadow-xl overflow-hidden mb-8">
+    <div class="gradient-green px-6 py-4">
+        <h2 class="text-xl font-bold text-white flex items-center space-x-2 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+            <i class="fas fa-filter"></i>
+            <span>{% trans "Filter Risks" %}</span>
+        </h2>
+    </div>
+    <div class="p-6">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label for="id_severity" class="block text-sm font-semibold text-gray-700 mb-2">
+                    {% trans "Severity" %}
+                </label>
+                <select name="severity" id="id_severity"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+                    <option value="">{% trans "All" %}</option>
+                    <option value="LOW" {% if request.GET.severity == 'LOW' %}selected{% endif %}>{% trans "Low" %}</option>
+                    <option value="MEDIUM" {% if request.GET.severity == 'MEDIUM' %}selected{% endif %}>{% trans "Medium" %}</option>
+                    <option value="HIGH" {% if request.GET.severity == 'HIGH' %}selected{% endif %}>{% trans "High" %}</option>
+                    <option value="CRITICAL" {% if request.GET.severity == 'CRITICAL' %}selected{% endif %}>{% trans "Critical" %}</option>
+                </select>
             </div>
-            <div class="form-group mr-3">
-                <label for="id_status" class="mr-2">Status:</label>
-                {{ filter_form.status }}
+            <div>
+                <label for="id_status" class="block text-sm font-semibold text-gray-700 mb-2">
+                    {% trans "Status" %}
+                </label>
+                <select name="status" id="id_status"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+                    <option value="">{% trans "All" %}</option>
+                    <option value="OPEN" {% if request.GET.status == 'OPEN' %}selected{% endif %}>{% trans "Open" %}</option>
+                    <option value="IN_PROGRESS" {% if request.GET.status == 'IN_PROGRESS' %}selected{% endif %}>{% trans "In Progress" %}</option>
+                    <option value="RESOLVED" {% if request.GET.status == 'RESOLVED' %}selected{% endif %}>{% trans "Resolved" %}</option>
+                    <option value="CLOSED" {% if request.GET.status == 'CLOSED' %}selected{% endif %}>{% trans "Closed" %}</option>
+                </select>
             </div>
-            <div class="form-group mr-3">
-                <label for="id_search" class="mr-2">Search:</label>
-                {{ filter_form.search }}
+            <div>
+                <label for="id_search" class="block text-sm font-semibold text-gray-700 mb-2">
+                    {% trans "Search" %}
+                </label>
+                <input type="text" name="search" id="id_search" value="{{ request.GET.search }}"
+                       placeholder="{% trans 'Search in problems...' %}"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
             </div>
-            <button type="submit" class="btn btn-secondary">
-                <i class="fas fa-filter"></i> Filter
-            </button>
-            <a href="{% url 'risks:list' %}" class="btn btn-outline-secondary ml-2">
-                <i class="fas fa-redo"></i> Clear
-            </a>
+            <div class="flex items-end space-x-2 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+                <button type="submit"
+                        class="flex-1 px-6 py-3 gradient-green text-white font-semibold rounded-lg hover:shadow-lg transition-shadow flex items-center justify-center space-x-2 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+                    <i class="fas fa-filter"></i>
+                    <span>{% trans "Filter" %}</span>
+                </button>
+                <a href="{% url 'risks:list' %}"
+                   class="px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center">
+                    <i class="fas fa-redo"></i>
+                </a>
+            </div>
         </form>
     </div>
 </div>
 
 <!-- Risks Table -->
 {% if page_obj %}
-<div class="card">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>ID</th>
-                        <th>Department</th>
-                        <th>Expected Problem</th>
-                        <th>Severity</th>
-                        <th>Status</th>
-                        <th>Resolution Time</th>
-                        <th>Created</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for risk in page_obj %}
-                    <tr>
-                        <td>{{ risk.id }}</td>
-                        <td>
-                            <span class="badge badge-secondary">{{ risk.department.code }}</span>
-                        </td>
-                        <td>
-                            {{ risk.expected_problem|truncatewords:10 }}
+<div class="glass rounded-2xl shadow-xl overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-800">
+                <tr>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                        {% trans "ID" %}
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                        {% trans "Department" %}
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                        {% trans "Expected Problem" %}
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                        {% trans "Severity" %}
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                        {% trans "Status" %}
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                        {% trans "Resolution Time" %}
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                        {% trans "Created" %}
+                    </th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                        {% trans "Actions" %}
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for risk in page_obj %}
+                <tr class="hover:bg-primary-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="text-sm font-semibold text-gray-900">#{{ risk.id }}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                            {{ risk.department.code }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center space-x-2 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+                            <span class="text-sm text-gray-900">{{ risk.expected_problem|truncatewords:10 }}</span>
                             {% if risk.is_locked %}
-                            <i class="fas fa-lock text-warning" title="Locked"></i>
+                            <i class="fas fa-lock text-yellow-500" title="{% trans 'Locked' %}"></i>
                             {% endif %}
-                        </td>
-                        <td>
-                            <span class="badge severity-badge-{{ risk.severity }} text-white">
-                                {{ risk.get_severity_display }}
-                            </span>
-                        </td>
-                        <td>
-                            <span class="badge status-badge-{{ risk.status }} text-white">
-                                {{ risk.get_status_display }}
-                            </span>
-                        </td>
-                        <td>{{ risk.get_resolution_duration_display_full }}</td>
-                        <td>{{ risk.created_at|date:"Y-m-d" }}</td>
-                        <td>
-                            <a href="{% url 'risks:detail' risk.pk %}" class="btn btn-sm btn-info" title="View Details">
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if risk.severity == 'LOW' %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                            {{ risk.get_severity_display }}
+                        </span>
+                        {% elif risk.severity == 'MEDIUM' %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                            {{ risk.get_severity_display }}
+                        </span>
+                        {% elif risk.severity == 'HIGH' %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                            {{ risk.get_severity_display }}
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                            {{ risk.get_severity_display }}
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if risk.status == 'OPEN' %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                            {{ risk.get_status_display }}
+                        </span>
+                        {% elif risk.status == 'IN_PROGRESS' %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                            {{ risk.get_status_display }}
+                        </span>
+                        {% elif risk.status == 'RESOLVED' %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            {{ risk.get_status_display }}
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                            {{ risk.get_status_display }}
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        {{ risk.get_resolution_duration_display_full }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {{ risk.created_at|date:"Y-m-d" }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center space-x-2 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+                            <a href="{% url 'risks:detail' risk.pk %}"
+                               class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                               title="{% trans 'View Details' %}">
                                 <i class="fas fa-eye"></i>
                             </a>
                             {% if user.is_admin %}
-                            <a href="{% url 'risks:update' risk.pk %}" class="btn btn-sm btn-warning" title="Edit">
+                            <a href="{% url 'risks:update' risk.pk %}"
+                               class="px-3 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                               title="{% trans 'Edit' %}">
                                 <i class="fas fa-edit"></i>
                             </a>
                             {% elif user.is_department_user and risk.department == user.department and not risk.is_locked %}
-                            <a href="{% url 'risks:update' risk.pk %}" class="btn btn-sm btn-warning" title="Edit">
+                            <a href="{% url 'risks:update' risk.pk %}"
+                               class="px-3 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                               title="{% trans 'Edit' %}">
                                 <i class="fas fa-edit"></i>
                             </a>
                             {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Pagination -->
-        {% if page_obj.has_other_pages %}
-        <nav aria-label="Page navigation" class="mt-4">
-            <ul class="pagination justify-content-center">
-                {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page=1">First</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                </li>
-                {% endif %}
-
-                <li class="page-item active">
-                    <span class="page-link">
-                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                    </span>
-                </li>
-
-                {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
-        {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+        <nav class="flex items-center justify-between">
+            <div class="flex-1 flex justify-between sm:hidden">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}"
+                   class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    {% trans "Previous" %}
+                </a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}"
+                   class="ml-3 px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    {% trans "Next" %}
+                </a>
+                {% endif %}
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700">
+                        {% trans "Page" %} <span class="font-semibold">{{ page_obj.number }}</span>
+                        {% trans "of" %} <span class="font-semibold">{{ page_obj.paginator.num_pages }}</span>
+                    </p>
+                </div>
+                <div>
+                    <nav class="inline-flex -space-x-px rounded-md shadow-sm">
+                        {% if page_obj.has_previous %}
+                        <a href="?page=1"
+                           class="px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 rounded-l-md">
+                            {% trans "First" %}
+                        </a>
+                        <a href="?page={{ page_obj.previous_page_number }}"
+                           class="px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                        {% endif %}
+
+                        <span class="px-4 py-2 border border-gray-300 bg-primary-50 text-sm font-medium text-primary-700">
+                            {{ page_obj.number }}
+                        </span>
+
+                        {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}"
+                           class="px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}"
+                           class="px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 rounded-r-md">
+                            {% trans "Last" %}
+                        </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            </div>
+        </nav>
+    </div>
+    {% endif %}
 </div>
 {% else %}
-<div class="alert alert-info">
-    <h4><i class="fas fa-info-circle"></i> No Risks Found</h4>
-    <p>
-        There are no risks matching your criteria.
+<div class="glass rounded-2xl p-8 text-center border-l-4 border-primary-500">
+    <div class="inline-flex items-center justify-center w-20 h-20 gradient-green rounded-full mb-4">
+        <i class="fas fa-info-circle text-white text-3xl"></i>
+    </div>
+    <h3 class="text-2xl font-bold text-gray-900 mb-2">{% trans "No Risks Found" %}</h3>
+    <p class="text-gray-600 mb-4">
+        {% trans "There are no risks matching your criteria." %}
         {% if user.is_admin or user.is_department_user %}
-        <a href="{% url 'risks:create' %}">Create a new risk</a>.
+        <a href="{% url 'risks:create' %}" class="text-primary-600 hover:text-primary-700 font-semibold">
+            {% trans "Create a new risk" %}
+        </a>.
         {% endif %}
     </p>
 </div>

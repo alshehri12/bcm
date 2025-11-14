@@ -1,159 +1,213 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}Risk Details - BCM System{% endblock %}
+{% block title %}{% trans "Risk Details" %} - BCM System{% endblock %}
 
 {% block content %}
-<div class="row mb-3">
-    <div class="col-md-8">
-        <h1><i class="fas fa-exclamation-triangle"></i> Risk Details</h1>
-    </div>
-    <div class="col-md-4 text-right">
-        <a href="{% url 'risks:list' %}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to List
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 flex items-center space-x-3 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %} mb-4 md:mb-0">
+        <div class="w-12 h-12 gradient-green rounded-xl flex items-center justify-center">
+            <i class="fas fa-exclamation-triangle text-white text-xl"></i>
+        </div>
+        <span>{% trans "Risk Details" %}</span>
+    </h1>
+    <div class="flex items-center space-x-3 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+        <a href="{% url 'risks:list' %}"
+           class="px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition-colors flex items-center space-x-2 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+            <i class="fas fa-arrow-left"></i>
+            <span>{% trans "Back to List" %}</span>
         </a>
         {% if can_edit %}
-        <a href="{% url 'risks:update' risk.pk %}" class="btn btn-warning">
-            <i class="fas fa-edit"></i> Edit
+        <a href="{% url 'risks:update' risk.pk %}"
+           class="px-6 py-3 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition-colors flex items-center space-x-2 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+            <i class="fas fa-edit"></i>
+            <span>{% trans "Edit" %}</span>
         </a>
         {% endif %}
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Risk Information</h5>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Content - Left Side -->
+    <div class="lg:col-span-2">
+        <div class="glass rounded-2xl shadow-xl overflow-hidden">
+            <div class="gradient-green px-6 py-4">
+                <h2 class="text-xl font-bold text-white">{% trans "Risk Information" %}</h2>
             </div>
-            <div class="card-body">
+            <div class="p-6 space-y-6">
                 <!-- Department -->
-                <div class="row mb-3">
-                    <div class="col-md-3"><strong>Department:</strong></div>
-                    <div class="col-md-9">
-                        <span class="badge badge-secondary">{{ risk.department.code }}</span>
-                        {{ risk.department.name }}
+                <div class="flex flex-col md:flex-row md:items-start">
+                    <div class="md:w-1/3 font-semibold text-gray-700 mb-2 md:mb-0">{% trans "Department" %}:</div>
+                    <div class="md:w-2/3">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 {% if LANGUAGE_CODE == 'ar' %}ml-2{% else %}mr-2{% endif %}">
+                            {{ risk.department.code }}
+                        </span>
+                        <span class="text-gray-900">{{ risk.department.name }}</span>
                     </div>
                 </div>
 
                 <!-- Expected Problem -->
-                <div class="row mb-3">
-                    <div class="col-md-3"><strong>Expected Problem:</strong></div>
-                    <div class="col-md-9">{{ risk.expected_problem }}</div>
+                <div class="flex flex-col md:flex-row md:items-start">
+                    <div class="md:w-1/3 font-semibold text-gray-700 mb-2 md:mb-0">{% trans "Expected Problem" %}:</div>
+                    <div class="md:w-2/3 text-gray-900">{{ risk.expected_problem }}</div>
                 </div>
 
                 <!-- Impact -->
-                <div class="row mb-3">
-                    <div class="col-md-3"><strong>Impact:</strong></div>
-                    <div class="col-md-9">{{ risk.impact }}</div>
+                <div class="flex flex-col md:flex-row md:items-start">
+                    <div class="md:w-1/3 font-semibold text-gray-700 mb-2 md:mb-0">{% trans "Impact" %}:</div>
+                    <div class="md:w-2/3 text-gray-900">{{ risk.impact }}</div>
                 </div>
 
                 <!-- Mitigation Notes -->
                 {% if risk.mitigation_notes %}
-                <div class="row mb-3">
-                    <div class="col-md-3"><strong>Mitigation Notes:</strong></div>
-                    <div class="col-md-9">{{ risk.mitigation_notes }}</div>
+                <div class="flex flex-col md:flex-row md:items-start">
+                    <div class="md:w-1/3 font-semibold text-gray-700 mb-2 md:mb-0">{% trans "Mitigation Notes" %}:</div>
+                    <div class="md:w-2/3 text-gray-900">{{ risk.mitigation_notes }}</div>
                 </div>
                 {% endif %}
 
-                <hr>
+                <div class="border-t border-gray-200 my-6"></div>
 
-                <!-- Severity & Status -->
-                <div class="row mb-3">
-                    <div class="col-md-3"><strong>Severity:</strong></div>
-                    <div class="col-md-9">
-                        <span class="badge severity-badge-{{ risk.severity }} text-white">
+                <!-- Severity -->
+                <div class="flex flex-col md:flex-row md:items-start">
+                    <div class="md:w-1/3 font-semibold text-gray-700 mb-2 md:mb-0">{% trans "Severity" %}:</div>
+                    <div class="md:w-2/3">
+                        {% if risk.severity == 'LOW' %}
+                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                             {{ risk.get_severity_display }}
                         </span>
+                        {% elif risk.severity == 'MEDIUM' %}
+                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                            {{ risk.get_severity_display }}
+                        </span>
+                        {% elif risk.severity == 'HIGH' %}
+                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                            {{ risk.get_severity_display }}
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                            {{ risk.get_severity_display }}
+                        </span>
+                        {% endif %}
                     </div>
                 </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-3"><strong>Status:</strong></div>
-                    <div class="col-md-9">
-                        <span class="badge status-badge-{{ risk.status }} text-white">
+                <!-- Status -->
+                <div class="flex flex-col md:flex-row md:items-start">
+                    <div class="md:w-1/3 font-semibold text-gray-700 mb-2 md:mb-0">{% trans "Status" %}:</div>
+                    <div class="md:w-2/3">
+                        {% if risk.status == 'OPEN' %}
+                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
                             {{ risk.get_status_display }}
                         </span>
+                        {% elif risk.status == 'IN_PROGRESS' %}
+                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                            {{ risk.get_status_display }}
+                        </span>
+                        {% elif risk.status == 'RESOLVED' %}
+                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            {{ risk.get_status_display }}
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                            {{ risk.get_status_display }}
+                        </span>
+                        {% endif %}
                     </div>
                 </div>
 
                 <!-- Resolution Duration -->
-                <div class="row mb-3">
-                    <div class="col-md-3"><strong>Estimated Resolution:</strong></div>
-                    <div class="col-md-9">{{ risk.get_resolution_duration_display_full }}</div>
+                <div class="flex flex-col md:flex-row md:items-start">
+                    <div class="md:w-1/3 font-semibold text-gray-700 mb-2 md:mb-0">{% trans "Estimated Resolution" %}:</div>
+                    <div class="md:w-2/3 text-gray-900">{{ risk.get_resolution_duration_display_full }}</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-md-4">
+    <!-- Sidebar - Right Side -->
+    <div class="lg:col-span-1 space-y-6">
         <!-- Status Card -->
-        <div class="card mb-3">
-            <div class="card-header bg-dark text-white">
-                <h6 class="mb-0">Status Information</h6>
+        <div class="glass rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-gray-800 px-6 py-4">
+                <h3 class="text-lg font-bold text-white">{% trans "Status Information" %}</h3>
             </div>
-            <div class="card-body">
-                <p class="mb-2">
-                    <strong>Lock Status:</strong><br>
+            <div class="p-6">
+                <div class="mb-4">
+                    <p class="text-sm font-semibold text-gray-700 mb-2">{% trans "Lock Status" %}:</p>
                     {% if risk.is_locked %}
-                    <span class="badge badge-warning">
-                        <i class="fas fa-lock"></i> Locked
+                    <span class="inline-flex items-center px-3 py-2 rounded-lg bg-yellow-100 text-yellow-800 font-medium">
+                        <i class="fas fa-lock {% if LANGUAGE_CODE == 'ar' %}ml-2{% else %}mr-2{% endif %}"></i>
+                        {% trans "Locked" %}
                     </span>
                     {% else %}
-                    <span class="badge badge-success">
-                        <i class="fas fa-unlock"></i> Unlocked
+                    <span class="inline-flex items-center px-3 py-2 rounded-lg bg-green-100 text-green-800 font-medium">
+                        <i class="fas fa-unlock {% if LANGUAGE_CODE == 'ar' %}ml-2{% else %}mr-2{% endif %}"></i>
+                        {% trans "Unlocked" %}
                     </span>
                     {% endif %}
-                </p>
+                </div>
 
                 {% if risk.is_locked %}
-                <p class="mb-2 small">
-                    <strong>Locked By:</strong> {{ risk.locked_by.get_full_name }}<br>
-                    <strong>Locked At:</strong> {{ risk.locked_at|date:"Y-m-d H:i" }}
-                </p>
+                <div class="p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500 mb-4">
+                    <p class="text-sm text-gray-700 mb-1">
+                        <strong>{% trans "Locked By" %}:</strong> {{ risk.locked_by.get_full_name }}
+                    </p>
+                    <p class="text-sm text-gray-700">
+                        <strong>{% trans "Locked At" %}:</strong> {{ risk.locked_at|date:"Y-m-d H:i" }}
+                    </p>
+                </div>
                 {% endif %}
 
                 {% if user.is_admin %}
-                <hr>
-                {% if risk.is_locked %}
-                <a href="{% url 'risks:unlock' risk.pk %}" class="btn btn-success btn-block">
-                    <i class="fas fa-unlock"></i> Unlock Risk
-                </a>
-                {% else %}
-                <a href="{% url 'risks:lock' risk.pk %}" class="btn btn-warning btn-block">
-                    <i class="fas fa-lock"></i> Lock Risk
-                </a>
-                {% endif %}
-                <a href="{% url 'risks:delete' risk.pk %}" class="btn btn-danger btn-block"
-                   onclick="return confirm('Are you sure you want to delete this risk?')">
-                    <i class="fas fa-trash"></i> Delete Risk
-                </a>
+                <div class="border-t border-gray-200 pt-4 space-y-3">
+                    {% if risk.is_locked %}
+                    <a href="{% url 'risks:unlock' risk.pk %}"
+                       class="w-full px-4 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center space-x-2 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+                        <i class="fas fa-unlock"></i>
+                        <span>{% trans "Unlock Risk" %}</span>
+                    </a>
+                    {% else %}
+                    <a href="{% url 'risks:lock' risk.pk %}"
+                       class="w-full px-4 py-3 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition-colors flex items-center justify-center space-x-2 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+                        <i class="fas fa-lock"></i>
+                        <span>{% trans "Lock Risk" %}</span>
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'risks:delete' risk.pk %}"
+                       onclick="return confirm('{% trans "Are you sure you want to delete this risk?" %}')"
+                       class="w-full px-4 py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center space-x-2 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+                        <i class="fas fa-trash"></i>
+                        <span>{% trans "Delete Risk" %}</span>
+                    </a>
+                </div>
                 {% endif %}
             </div>
         </div>
 
         <!-- Audit Trail Card -->
-        <div class="card">
-            <div class="card-header bg-info text-white">
-                <h6 class="mb-0">Audit Trail</h6>
+        <div class="glass rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-blue-600 px-6 py-4">
+                <h3 class="text-lg font-bold text-white">{% trans "Audit Trail" %}</h3>
             </div>
-            <div class="card-body">
-                <p class="mb-2 small">
-                    <strong>Created By:</strong><br>
-                    {{ risk.created_by.get_full_name|default:risk.created_by.username }}
-                </p>
-                <p class="mb-2 small">
-                    <strong>Created At:</strong><br>
-                    {{ risk.created_at|date:"Y-m-d H:i:s" }}
-                </p>
-                <hr>
-                <p class="mb-2 small">
-                    <strong>Last Updated By:</strong><br>
-                    {{ risk.updated_by.get_full_name|default:risk.updated_by.username|default:"N/A" }}
-                </p>
-                <p class="mb-0 small">
-                    <strong>Last Updated:</strong><br>
-                    {{ risk.updated_at|date:"Y-m-d H:i:s" }}
-                </p>
+            <div class="p-6 space-y-4">
+                <div>
+                    <p class="text-sm font-semibold text-gray-700 mb-1">{% trans "Created By" %}:</p>
+                    <p class="text-sm text-gray-900">{{ risk.created_by.get_full_name|default:risk.created_by.username }}</p>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-gray-700 mb-1">{% trans "Created At" %}:</p>
+                    <p class="text-sm text-gray-600">{{ risk.created_at|date:"Y-m-d H:i:s" }}</p>
+                </div>
+                <div class="border-t border-gray-200 pt-4">
+                    <p class="text-sm font-semibold text-gray-700 mb-1">{% trans "Last Updated By" %}:</p>
+                    <p class="text-sm text-gray-900">{{ risk.updated_by.get_full_name|default:risk.updated_by.username|default:"N/A" }}</p>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-gray-700 mb-1">{% trans "Last Updated" %}:</p>
+                    <p class="text-sm text-gray-600">{{ risk.updated_at|date:"Y-m-d H:i:s" }}</p>
+                </div>
             </div>
         </div>
     </div>
