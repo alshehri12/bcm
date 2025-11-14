@@ -50,41 +50,95 @@ def profile_view(request):
 
 
 def set_language(request):
-    """Set user language preference"""
+    """
+    Handle language switching for both authenticated and unauthenticated users.
+
+    This view is called when users click the English/Arabic language switcher buttons
+    on the login page or in the navigation bar. It handles language preference in three ways:
+    1. Session storage (for immediate effect and unauthenticated users)
+    2. Cookie storage (for persistence across sessions)
+    3. Database storage (for authenticated users)
+
+    The three-tier storage ensures:
+    - Immediate language switch on the current page
+    - Language persists across browser sessions (via cookie)
+    - Logged-in users see their preference on all devices (via database)
+
+    Args:
+        request (HttpRequest): The HTTP request containing language preference in POST data
+
+    POST Parameters:
+        language (str): The selected language code ('en' or 'ar')
+        next (str): Optional URL to redirect to after language change
+
+    Returns:
+        HttpResponseRedirect: Redirects back to the page the user came from
+
+    Process Flow:
+        1. Validate POST request and language code
+        2. Activate language for current request
+        3. Store in session (picked up by UserLanguageMiddleware)
+        4. Store in cookie (1 year expiry for long-term persistence)
+        5. If user is logged in, save to User model in database
+        6. Redirect back to original page with new language active
+
+    Security:
+        - Only accepts 'en' and 'ar' to prevent injection attacks
+        - Uses Django's translation.activate() for safe language activation
+        - Validates language before storing in session/cookie/database
+
+    Example:
+        Form on login page:
+        <form method="post" action="{% url 'accounts:set_language' %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{% url 'accounts:login' %}">
+            <button type="submit" name="language" value="ar">العربية</button>
+        </form>
+    """
     from django.utils import translation
     from django.http import HttpResponseRedirect
 
-    # Django's session key for language (used by LocaleMiddleware)
+    # Django's standard session key for language (used by LocaleMiddleware)
     LANGUAGE_SESSION_KEY = '_language'
 
     if request.method == 'POST':
+        # Get the selected language from POST data (default to English)
         language = request.POST.get('language', 'en')
+
+        # Only process valid language codes to prevent security issues
         if language in ['en', 'ar']:
-            # Activate language for current request
+            # Step 1: Activate language for the current request immediately
+            # This ensures the redirect response shows the new language
             translation.activate(language)
 
-            # Get the redirect URL
+            # Step 2: Prepare redirect response
+            # Redirect to the 'next' URL if provided, otherwise go back to referer
             next_url = request.POST.get('next', request.META.get('HTTP_REFERER', '/'))
             response = HttpResponseRedirect(next_url)
 
-            # Set language in session - Django's LocaleMiddleware will pick this up
+            # Step 3: Store language in session
+            # This is picked up by UserLanguageMiddleware on the next request
+            # and by Django's built-in LocaleMiddleware
             request.session[LANGUAGE_SESSION_KEY] = language
 
-            # Also set a cookie for the language (fallback)
+            # Step 4: Store language in a long-lived cookie
+            # This ensures language preference persists even after session expires
+            # Cookie lasts for 1 year (365 days)
             response.set_cookie(
-                'django_language',
-                language,
-                max_age=365 * 24 * 60 * 60  # 1 year
+                'django_language',  # Cookie name
+                language,           # Cookie value ('en' or 'ar')
+                max_age=365 * 24 * 60 * 60  # Expiry: 1 year in seconds
             )
 
-            # Save to user profile if authenticated
+            # Step 5: Save to user profile if authenticated
+            # This ensures the user sees their preferred language across devices/browsers
             if request.user.is_authenticated:
                 request.user.language = language
-                request.user.save(update_fields=['language'])
+                request.user.save(update_fields=['language'])  # Only update language field for efficiency
                 messages.success(request, 'Language changed successfully.')
 
             return response
 
-    # Redirect to the page they came from
+    # If not POST or invalid language, redirect back to where they came from
     next_url = request.POST.get('next', request.META.get('HTTP_REFERER', '/'))
     return redirect(next_url)

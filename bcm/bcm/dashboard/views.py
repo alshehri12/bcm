@@ -1,3 +1,25 @@
+"""
+Dashboard and Reporting Views for BCM Risk Management System
+
+This module contains all dashboard views and export functionality including:
+- Role-based dashboard views (Admin, Department User, Viewer)
+- Excel export of risk data with filtering
+- Professional PDF report generation with charts and analytics
+
+The dashboard adapts its content based on user roles:
+- Admins see organization-wide statistics across all departments
+- Department Users see statistics limited to their department
+- Viewers see the same view as Admins (read-only)
+
+Export Features:
+- Excel export: Tabular data with filtering options
+- PDF export: Executive-style report with logo, charts, and department breakdown
+  * Uses ReportLab for PDF generation
+  * Uses Matplotlib for data visualization charts
+  * Includes 4 analytical charts (pie charts and bar charts)
+  * Professional layout with NCEC branding
+"""
+
 from django.shortcuts import render, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Avg, Q
@@ -13,7 +35,32 @@ from io import BytesIO
 
 @login_required
 def dashboard_home(request):
-    """Main dashboard view - shows different content based on user role"""
+    """
+    Main dashboard view displaying risk statistics based on user role.
+
+    This view provides a role-aware dashboard showing relevant risk metrics:
+    - Admins: Organization-wide statistics across all departments
+    - Department Users: Statistics limited to their assigned department
+    - Viewers: Same as admins (full visibility but read-only)
+
+    The dashboard includes:
+    - Total risks count
+    - Open risks (requiring attention)
+    - Critical risks (highest priority)
+    - Department-wise breakdown (for admins)
+    - Risk severity distribution
+    - Recent risks list
+    - Average resolution time
+
+    Args:
+        request (HttpRequest): The HTTP request object with authenticated user
+
+    Returns:
+        HttpResponse: Rendered dashboard template with context data
+
+    Template:
+        dashboard/home.html
+    """
     user = request.user
 
     if user.is_admin():
