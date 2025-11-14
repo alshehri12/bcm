@@ -21,6 +21,11 @@ def risk_list(request):
     else:
         risks = Risk.objects.none()
 
+    # Apply department filter from URL (for admin viewing specific department)
+    department_id = request.GET.get('department')
+    if department_id and (user.is_admin() or user.is_viewer()):
+        risks = risks.filter(department_id=department_id)
+
     # Apply filters
     form = RiskFilterForm(request.GET)
     if form.is_valid():
@@ -42,9 +47,16 @@ def risk_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # Get filtered department for display
+    filtered_department = None
+    if department_id:
+        from departments.models import Department
+        filtered_department = Department.objects.filter(id=department_id).first()
+
     context = {
         'page_obj': page_obj,
         'filter_form': form,
+        'filtered_department': filtered_department,
     }
     return render(request, 'risks/risk_list.html', context)
 

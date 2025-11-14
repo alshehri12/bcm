@@ -6,15 +6,28 @@
 {% block content %}
 <!-- Page Header -->
 <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-    <h1 class="text-3xl font-bold text-gray-900 flex items-center space-x-3 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %} mb-4 md:mb-0">
-        <div class="w-12 h-12 gradient-green rounded-xl flex items-center justify-center">
-            <i class="fas fa-exclamation-triangle text-white text-xl"></i>
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center space-x-3 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %} mb-2">
+            <div class="w-12 h-12 gradient-green rounded-xl flex items-center justify-center">
+                <i class="fas fa-exclamation-triangle text-white text-xl"></i>
+            </div>
+            <span>{% trans "Risks Management" %}</span>
+        </h1>
+        {% if filtered_department %}
+        <div class="flex items-center space-x-2 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse ml-16{% else %}ml-16{% endif %} mt-2">
+            <span class="inline-flex items-center px-4 py-2 rounded-lg bg-primary-100 text-primary-800 font-medium">
+                <i class="fas fa-building {% if LANGUAGE_CODE == 'ar' %}ml-2{% else %}mr-2{% endif %}"></i>
+                {{ filtered_department.name }} ({{ filtered_department.code }})
+            </span>
+            <a href="{% url 'risks:list' %}" class="text-sm text-gray-600 hover:text-primary-600">
+                <i class="fas fa-times-circle"></i> {% trans "Clear filter" %}
+            </a>
         </div>
-        <span>{% trans "Risks Management" %}</span>
-    </h1>
+        {% endif %}
+    </div>
     {% if user.is_admin or user.is_department_user %}
     <a href="{% url 'risks:create' %}"
-       class="px-6 py-3 gradient-green text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-shadow flex items-center space-x-2 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+       class="px-6 py-3 gradient-green text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-shadow flex items-center space-x-2 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %} mt-4 md:mt-0">
         <i class="fas fa-plus-circle"></i>
         <span>{% trans "Add New Risk" %}</span>
     </a>
