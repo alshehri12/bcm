@@ -171,50 +171,212 @@ def export_excel(request):
 @admin_required
 @login_required
 def export_pdf(request):
-    """Export risks summary to PDF (Admin only)"""
+    """Export elegant PDF report with logo and charts"""
+    from reportlab.lib import colors
+    from reportlab.lib.units import inch
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, PageBreak
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.enums import TA_CENTER, TA_RIGHT
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    from datetime import datetime
+    import os
+    from django.conf import settings
+
     buffer = BytesIO()
-    p = canvas.Canvas(buffer, pagesize=letter)
+    doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
+    story = []
+    styles = getSampleStyleSheet()
     width, height = letter
 
-    # Title
-    p.setFont("Helvetica-Bold", 16)
-    p.drawString(50, height - 50, "BCM Risk Management Report")
+    # Custom styles
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        textColor=colors.HexColor('#16a34a'),
+        spaceAfter=30,
+        alignment=TA_CENTER,
+        fontName='Helvetica-Bold'
+    )
 
-    # Summary statistics
-    p.setFont("Helvetica", 12)
-    y = height - 100
+    heading_style = ParagraphStyle(
+        'CustomHeading',
+        parent=styles['Heading2'],
+        fontSize=16,
+        textColor=colors.HexColor('#16a34a'),
+        spaceAfter=12,
+        spaceBefore=12,
+        fontName='Helvetica-Bold'
+    )
+
+    # Add logo
+    logo_path = os.path.join(settings.BASE_DIR, 'static', 'images', 'ncec-logo-en.png')
+    if os.path.exists(logo_path):
+        logo = Image(logo_path, width=2*inch, height=0.8*inch)
+        logo.hAlign = 'CENTER'
+        story.append(logo)
+        story.append(Spacer(1, 20))
+
+    # Title
+    title = Paragraph("Business Continuity Management<br/>Risk Assessment Report", title_style)
+    story.append(title)
+
+    # Date
+    date_style = ParagraphStyle('DateStyle', parent=styles['Normal'], alignment=TA_CENTER, fontSize=10, textColor=colors.grey)
+    story.append(Paragraph(f"Generated on: {datetime.now().strftime('%B %d, %Y at %H:%M')}", date_style))
+    story.append(Spacer(1, 30))
+
+    # Executive Summary
+    story.append(Paragraph("Executive Summary", heading_style))
 
     total_risks = Risk.objects.count()
     open_risks = Risk.objects.filter(status='OPEN').count()
+    in_progress = Risk.objects.filter(status='IN_PROGRESS').count()
+    resolved_risks = Risk.objects.filter(status='RESOLVED').count()
     critical_risks = Risk.objects.filter(severity='CRITICAL').count()
+    high_risks = Risk.objects.filter(severity='HIGH').count()
+    medium_risks = Risk.objects.filter(severity='MEDIUM').count()
+    low_risks = Risk.objects.filter(severity='LOW').count()
 
-    p.drawString(50, y, f"Total Risks: {total_risks}")
-    y -= 20
-    p.drawString(50, y, f"Open Risks: {open_risks}")
-    y -= 20
-    p.drawString(50, y, f"Critical Risks: {critical_risks}")
-    y -= 40
+    # Summary statistics table
+    summary_data = [
+        ['Metric', 'Count', 'Percentage'],
+        ['Total Risks', str(total_risks), '100%'],
+        ['Open Risks', str(open_risks), f'{(open_risks/total_risks*100) if total_risks > 0 else 0:.1f}%'],
+        ['In Progress', str(in_progress), f'{(in_progress/total_risks*100) if total_risks > 0 else 0:.1f}%'],
+        ['Resolved Risks', str(resolved_risks), f'{(resolved_risks/total_risks*100) if total_risks > 0 else 0:.1f}%'],
+        ['Critical Severity', str(critical_risks), f'{(critical_risks/total_risks*100) if total_risks > 0 else 0:.1f}%'],
+        ['High Severity', str(high_risks), f'{(high_risks/total_risks*100) if total_risks > 0 else 0:.1f}%'],
+    ]
 
-    # Department summary
-    p.setFont("Helvetica-Bold", 14)
-    p.drawString(50, y, "Department Summary")
-    y -= 20
-    p.setFont("Helvetica", 10)
+    summary_table = Table(summary_data, colWidths=[3*inch, 1.5*inch, 1.5*inch])
+    summary_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#16a34a')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+        ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
+    ]))
+    story.append(summary_table)
+    story.append(Spacer(1, 30))
 
+    # Create charts
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 8))
+    fig.patch.set_facecolor('white')
+
+    # Chart 1: Risk Status Distribution
+    status_data = [open_risks, in_progress, resolved_risks, Risk.objects.filter(status='CLOSED').count()]
+    status_labels = ['Open', 'In Progress', 'Resolved', 'Closed']
+    colors_status = ['#ef4444', '#3b82f6', '#22c55e', '#6b7280']
+    ax1.pie(status_data, labels=status_labels, autopct='%1.1f%%', colors=colors_status, startangle=90)
+    ax1.set_title('Risk Status Distribution', fontsize=12, fontweight='bold', color='#16a34a')
+
+    # Chart 2: Severity Distribution
+    severity_data = [critical_risks, high_risks, medium_risks, low_risks]
+    severity_labels = ['Critical', 'High', 'Medium', 'Low']
+    colors_severity = ['#dc2626', '#f59e0b', '#eab308', '#3b82f6']
+    ax2.pie(severity_data, labels=severity_labels, autopct='%1.1f%%', colors=colors_severity, startangle=90)
+    ax2.set_title('Severity Distribution', fontsize=12, fontweight='bold', color='#16a34a')
+
+    # Chart 3: Top 5 Departments by Risk Count
     departments = Department.objects.filter(is_active=True)
+    dept_data = []
     for dept in departments:
-        dept_risk_count = Risk.objects.filter(department=dept).count()
-        p.drawString(50, y, f"{dept.name}: {dept_risk_count} risks")
-        y -= 15
-        if y < 100:
-            p.showPage()
-            y = height - 50
+        count = Risk.objects.filter(department=dept).count()
+        if count > 0:
+            dept_data.append((dept.code, count))
+    dept_data.sort(key=lambda x: x[1], reverse=True)
+    dept_data = dept_data[:5]
 
-    p.showPage()
-    p.save()
+    if dept_data:
+        dept_names = [d[0] for d in dept_data]
+        dept_counts = [d[1] for d in dept_data]
+        ax3.barh(dept_names, dept_counts, color='#22c55e')
+        ax3.set_xlabel('Number of Risks')
+        ax3.set_title('Top 5 Departments by Risk Count', fontsize=12, fontweight='bold', color='#16a34a')
+        ax3.invert_yaxis()
+
+    # Chart 4: Risk Trend (Status breakdown by severity)
+    severities = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
+    open_by_sev = [Risk.objects.filter(severity=s, status='OPEN').count() for s in severities]
+    prog_by_sev = [Risk.objects.filter(severity=s, status='IN_PROGRESS').count() for s in severities]
+
+    x = range(len(severities))
+    width = 0.35
+    ax4.bar([i - width/2 for i in x], open_by_sev, width, label='Open', color='#ef4444')
+    ax4.bar([i + width/2 for i in x], prog_by_sev, width, label='In Progress', color='#3b82f6')
+    ax4.set_xlabel('Severity Level')
+    ax4.set_ylabel('Number of Risks')
+    ax4.set_title('Risk Status by Severity', fontsize=12, fontweight='bold', color='#16a34a')
+    ax4.set_xticks(x)
+    ax4.set_xticklabels(severities)
+    ax4.legend()
+
+    plt.tight_layout()
+
+    # Save chart to buffer
+    chart_buffer = BytesIO()
+    plt.savefig(chart_buffer, format='png', dpi=150, bbox_inches='tight')
+    chart_buffer.seek(0)
+    plt.close()
+
+    # Add charts to PDF
+    story.append(Paragraph("Risk Analytics & Visualizations", heading_style))
+    chart_image = Image(chart_buffer, width=6.5*inch, height=5.2*inch)
+    story.append(chart_image)
+    story.append(PageBreak())
+
+    # Department Details
+    story.append(Paragraph("Department Risk Breakdown", heading_style))
+    story.append(Spacer(1, 12))
+
+    dept_detail_data = [['Department', 'Code', 'Total', 'Open', 'Critical', 'High']]
+    for dept in departments:
+        dept_risks = Risk.objects.filter(department=dept)
+        dept_detail_data.append([
+            dept.name[:25],
+            dept.code,
+            str(dept_risks.count()),
+            str(dept_risks.filter(status='OPEN').count()),
+            str(dept_risks.filter(severity='CRITICAL').count()),
+            str(dept_risks.filter(severity='HIGH').count()),
+        ])
+
+    dept_table = Table(dept_detail_data, colWidths=[2.5*inch, 0.8*inch, 0.8*inch, 0.8*inch, 0.8*inch, 0.8*inch])
+    dept_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#16a34a')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
+    ]))
+    story.append(dept_table)
+    story.append(Spacer(1, 20))
+
+    # Footer note
+    footer_style = ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8, textColor=colors.grey, alignment=TA_CENTER)
+    story.append(Spacer(1, 30))
+    story.append(Paragraph(
+        "This report is confidential and for internal use only.<br/>"
+        "Generated by BCM Risk Management System - NCEC",
+        footer_style
+    ))
+
+    # Build PDF
+    doc.build(story)
 
     buffer.seek(0)
     response = HttpResponse(buffer, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename=bcm_risks_summary.pdf'
+    response['Content-Disposition'] = f'attachment; filename=bcm_risk_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
 
     return response
