@@ -58,7 +58,7 @@ def set_language(request):
         if language in ['en', 'ar']:
             # Activate language for current session
             translation.activate(language)
-            request.session[translation.LANGUAGE_SESSION_KEY] = language
+            request.session['django_language'] = language
 
             # Save to user profile if authenticated
             if request.user.is_authenticated:
