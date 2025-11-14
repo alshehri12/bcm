@@ -52,19 +52,35 @@ def profile_view(request):
 def set_language(request):
     """Set user language preference"""
     from django.utils import translation
+    from django.http import HttpResponseRedirect
 
     if request.method == 'POST':
         language = request.POST.get('language', 'en')
         if language in ['en', 'ar']:
-            # Activate language for current session
+            # Activate language for current request
             translation.activate(language)
-            request.session['django_language'] = language
+
+            # Get the redirect URL
+            next_url = request.POST.get('next', request.META.get('HTTP_REFERER', '/'))
+            response = HttpResponseRedirect(next_url)
+
+            # Set language in session - Django's LocaleMiddleware will pick this up
+            request.session[translation.LANGUAGE_SESSION_KEY] = language
+
+            # Also set a cookie for the language (fallback)
+            response.set_cookie(
+                'django_language',
+                language,
+                max_age=365 * 24 * 60 * 60  # 1 year
+            )
 
             # Save to user profile if authenticated
             if request.user.is_authenticated:
                 request.user.language = language
                 request.user.save(update_fields=['language'])
                 messages.success(request, 'Language changed successfully.')
+
+            return response
 
     # Redirect to the page they came from
     next_url = request.POST.get('next', request.META.get('HTTP_REFERER', '/'))
