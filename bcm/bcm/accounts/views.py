@@ -54,6 +54,9 @@ def set_language(request):
     from django.utils import translation
     from django.http import HttpResponseRedirect
 
+    # Django's session key for language (used by LocaleMiddleware)
+    LANGUAGE_SESSION_KEY = '_language'
+
     if request.method == 'POST':
         language = request.POST.get('language', 'en')
         if language in ['en', 'ar']:
@@ -65,7 +68,7 @@ def set_language(request):
             response = HttpResponseRedirect(next_url)
 
             # Set language in session - Django's LocaleMiddleware will pick this up
-            request.session[translation.LANGUAGE_SESSION_KEY] = language
+            request.session[LANGUAGE_SESSION_KEY] = language
 
             # Also set a cookie for the language (fallback)
             response.set_cookie(

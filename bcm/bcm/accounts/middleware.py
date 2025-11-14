@@ -1,6 +1,9 @@
 from django.utils import translation
 from django.utils.deprecation import MiddlewareMixin
 
+# Django's session key for language (used by LocaleMiddleware)
+LANGUAGE_SESSION_KEY = '_language'
+
 
 class UserLanguageMiddleware(MiddlewareMixin):
     """
@@ -17,7 +20,7 @@ class UserLanguageMiddleware(MiddlewareMixin):
                 return
 
         # Second priority: Session language (for unauthenticated users)
-        session_language = request.session.get(translation.LANGUAGE_SESSION_KEY)
+        session_language = request.session.get(LANGUAGE_SESSION_KEY)
         if session_language:
             translation.activate(session_language)
             request.LANGUAGE_CODE = session_language
